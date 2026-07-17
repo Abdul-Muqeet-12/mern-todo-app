@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import authRouter from "./routes/auth.routes.js";
+import todoRoutes from "./routes/todo.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/todos", todoRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server started on PORT:${PORT}`);
