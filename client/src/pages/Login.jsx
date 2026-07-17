@@ -1,17 +1,42 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Login() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formData);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/login`,
+        formData,
+        {
+          withCredentials: true,
+        },
+      );
+
+      if (response.data.success) {
+        alert(response.data.message);
+
+        navigate("/");
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Something went wrong");
+    }
   };
 
   return (
@@ -35,6 +60,8 @@ function Login() {
               placeholder="Enter your email"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="email"
+              required
               className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500"
             />
           </div>
@@ -50,6 +77,8 @@ function Login() {
               placeholder="Enter your password"
               value={formData.password}
               onChange={handleChange}
+              autoComplete="current-password"
+              required
               className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500"
             />
           </div>
