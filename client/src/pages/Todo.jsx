@@ -68,6 +68,33 @@ function Todo() {
     }
   };
 
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this todo?",
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_URL}/todos/${id}`,
+        {
+          withCredentials: true,
+        },
+      );
+
+      if (response.data.success) {
+        alert(response.data.message);
+
+        await getTodos();
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Something went wrong");
+    }
+  };
+
   const handleLogout = async () => {
     try {
       const response = await axios.post(
@@ -184,6 +211,12 @@ function Todo() {
                       {todo.completed ? "Completed" : "Pending"}
                     </span>
                   </p>
+                  <button
+                    onClick={() => handleDelete(todo._id)}
+                    className="mt-4 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg cursor-pointer"
+                  >
+                    Delete
+                  </button>
                 </div>
               ))}
             </div>
