@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
+
+  const { checkAuth } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -30,6 +33,8 @@ function Login() {
       );
 
       if (response.data.success) {
+        await checkAuth();
+
         alert(response.data.message);
 
         navigate("/");

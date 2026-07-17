@@ -1,11 +1,34 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
 function Todo() {
   const { user, setUser } = useContext(AuthContext);
+
   const navigate = useNavigate();
+
+  const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const getTodos = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/todos`,
+        {
+          withCredentials: true,
+        },
+      );
+
+      if (response.data.success) {
+        setTodos(response.data.todos);
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -19,9 +42,7 @@ function Todo() {
 
       if (response.data.success) {
         setUser(null);
-
         alert(response.data.message);
-
         navigate("/login");
       }
     } catch (error) {
@@ -29,24 +50,72 @@ function Todo() {
     }
   };
 
+  useEffect(() => {
+    getTodos();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2 className="text-2xl font-semibold">Loading...</h2>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4">
-      <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-lg text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">MERN Todo App</h1>
+    <div className="min-h-screen bg-gray-100 py-10 px-4">
+      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8">
+        <div className="flex items-center justify-between border-b pb-5">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">MERN Todo App</h1>
 
-        <p className="text-lg text-gray-600 mb-2">
-          Welcome,
-          <span className="font-semibold text-blue-600"> {user?.name}</span>
-        </p>
+            <p className="mt-2 text-gray-600">
+              Welcome,
+              <span className="font-semibold text-blue-600">{user?.name}</span>
+            </p>
 
-        <p className="text-gray-500 mb-8">{user?.email}</p>
+            <p className="text-gray-500 text-sm">{user?.email}</p>
+          </div>
 
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition cursor-pointer"
-        >
-          Logout
-        </button>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg transition cursor-pointer"
+          >
+            Logout
+          </button>
+        </div>
+
+        {/* Todo List */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-5">My Todos</h2>
+
+          {todos.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-gray-500 text-lg">No todos found.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {todos.map((todo) => (
+                <div key={todo._id} className="border rounded-lg p-5 shadow-sm">
+                  <h3 className="text-xl font-semibold">{todo.title}</h3>
+
+                  <p className="text-gray-600 mt-2">{todo.description}</p>
+
+                  <p className="mt-3">
+                    Status:
+                    <span
+                      className={`ml-2 font-medium ${
+                        todo.completed ? "text-green-600" : "text-yellow-600"
+                      }`}
+                    >
+                      {todo.completed ? "Completed" : "Pending"}
+                    </span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
