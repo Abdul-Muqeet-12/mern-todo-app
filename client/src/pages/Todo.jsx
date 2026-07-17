@@ -14,6 +14,7 @@ function Todo() {
     title: "",
     description: "",
   });
+  const [editingId, setEditingId] = useState(null);
 
   const getTodos = async () => {
     try {
@@ -45,13 +46,25 @@ function Todo() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/todos`,
-        formData,
-        {
-          withCredentials: true,
-        },
-      );
+      let response;
+
+      if (editingId) {
+        response = await axios.patch(
+          `${import.meta.env.VITE_API_URL}/todos/${editingId}`,
+          formData,
+          {
+            withCredentials: true,
+          },
+        );
+      } else {
+        response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/todos`,
+          formData,
+          {
+            withCredentials: true,
+          },
+        );
+      }
 
       if (response.data.success) {
         alert(response.data.message);
@@ -60,6 +73,8 @@ function Todo() {
           title: "",
           description: "",
         });
+
+        setEditingId(null);
 
         await getTodos();
       }
@@ -93,6 +108,15 @@ function Todo() {
     } catch (error) {
       alert(error.response?.data?.message || "Something went wrong");
     }
+  };
+
+  const handleEdit = (todo) => {
+    setEditingId(todo._id);
+
+    setFormData({
+      title: todo.title,
+      description: todo.description,
+    });
   };
 
   const handleLogout = async () => {
@@ -184,7 +208,7 @@ function Todo() {
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg cursor-pointer"
             >
-              Add Todo
+              {editingId ? "Update Todo" : "Add Todo"}
             </button>
           </form>
           <h2 className="text-2xl font-semibold mb-5">My Todos</h2>
@@ -211,12 +235,21 @@ function Todo() {
                       {todo.completed ? "Completed" : "Pending"}
                     </span>
                   </p>
-                  <button
-                    onClick={() => handleDelete(todo._id)}
-                    className="mt-4 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg cursor-pointer"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex gap-3 mt-4">
+                    <button
+                      onClick={() => handleEdit(todo)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-lg cursor-pointer"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(todo._id)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg cursor-pointer"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
