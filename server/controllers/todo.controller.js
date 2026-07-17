@@ -31,3 +31,22 @@ export const createTodo = async (req, res) => {
     });
   }
 };
+
+export const getTodos = async (req, res) => {
+  try {
+    const todos = await Todo.find({
+      user: req.userId,
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: todos.length,
+      todos,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
