@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Register() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,10 +18,26 @@ function Register() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formData);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/register`,
+        formData,
+        {
+          withCredentials: true,
+        },
+      );
+
+      if (response.data.success) {
+        alert(response.data.message);
+
+        navigate("/");
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Something went wrong");
+    }
   };
 
   return (
@@ -91,7 +110,7 @@ function Register() {
         </form>
 
         <p className="text-center text-gray-600 mt-6">
-          Already have an account?
+          Already have an account?{" "}
           <Link
             to="/login"
             className="text-blue-600 hover:underline font-medium"
