@@ -1,7 +1,16 @@
+import { Route, Routes } from "react-router-dom";
+import Todo from "./pages/Todo";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+
 function App() {
   return (
     <div>
-      <h1>MERN Todo App</h1>
+      <Routes>
+        <Route path="/" element={<Todo />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
     </div>
   );
 }
