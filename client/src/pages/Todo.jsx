@@ -10,6 +10,10 @@ function Todo() {
 
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+  });
 
   const getTodos = async () => {
     try {
@@ -27,6 +31,40 @@ function Todo() {
       alert(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/todos`,
+        formData,
+        {
+          withCredentials: true,
+        },
+      );
+
+      if (response.data.success) {
+        alert(response.data.message);
+
+        setFormData({
+          title: "",
+          description: "",
+        });
+
+        await getTodos();
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -87,6 +125,41 @@ function Todo() {
 
         {/* Todo List */}
         <div className="mt-8">
+          <form onSubmit={handleSubmit} className="mb-8 space-y-4">
+            <div>
+              <label className="block mb-2 font-medium">Title</label>
+
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="Enter todo title"
+                required
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 font-medium">Description</label>
+
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Enter description"
+                rows="4"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500 resize-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg cursor-pointer"
+            >
+              Add Todo
+            </button>
+          </form>
           <h2 className="text-2xl font-semibold mb-5">My Todos</h2>
 
           {todos.length === 0 ? (
